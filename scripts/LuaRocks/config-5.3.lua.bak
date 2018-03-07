@@ -1,0 +1,13 @@
+rocks_trees = {
+    { name = [[user]],
+         root    = home..[[/luarocks]],
+    },
+    { name = [[system]],
+         root    = [[C:\Program Files (x86)\PUC-Lua\5.3.4\x86\systree]],
+    },
+}
+variables = {
+    MSVCRT = 'MSVCRT',
+    LUALIB = 'lua53.dll'
+}
+verbose = false   -- set to 'true' to enable verbose output
