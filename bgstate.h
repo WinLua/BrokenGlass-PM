@@ -1,3 +1,5 @@
+
+
 #ifndef BGSTATE_H
 #define BGSTATE_H
 
@@ -21,8 +23,10 @@ public slots:
 private:
     sol::state m_lua;
     bool loadLuaRocks();
-    bool addPackagePath(QString path);
+    void addPackagePath(QString path);
     sol::object runScript(QString script);
+
+//    'scripts\LuaRocks\luarocks.lua'
 };
 
 #endif // BGSTATE_H

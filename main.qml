@@ -60,7 +60,13 @@ QtObject {
                 y: 21
                 text: qsTr("Press me")
                 onClicked: {
+                    try{
                     text1.text = state.returnString(input1.text)
+                    }
+                    catch(ex)
+                    {
+                    text1.text = "Lua Crashed. Restart now please."
+                    }
                 }
             }
         }

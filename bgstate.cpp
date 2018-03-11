@@ -3,8 +3,9 @@
 
 BGState::BGState(QObject *parent) : QObject(parent)
 {
-    m_lua.open_libraries(sol::lib::base, sol::lib::io, sol::lib::string, sol::lib::package, sol::lib::math, sol::lib::table);
+    m_lua.open_libraries(sol::lib::base, sol::lib::io, sol::lib::string, sol::lib::package, sol::lib::math, sol::lib::table, sol::lib::os, sol::lib::debug);
     m_lua.script("function add_pp(val) package.path = package.path .. val .. ';' end") ;
+    loadLuaRocks();
 }
 
 QString BGState::returnString(QString script)
@@ -39,39 +40,30 @@ bool BGState::returnBoolean(QString script)
 
 sol::object BGState::runScript(QString script)
 {
-    try
-    {
-        return m_lua.script(script.toStdString(),
-                                          sol::script_default_on_error);
-    }
-    catch (sol::error& err)
-    {
-        std::cout << "Oops: " << err.what() << std::endl;
-        return sol::nil;
-    }
+    return m_lua.script(script.toStdString(),
+                        sol::script_default_on_error);
 }
 
-bool BGState::addPackagePath(QString path)
+void BGState::addPackagePath(QString path)
 {
-    try{
-        m_lua["add_pp"](path.toStdString());
-        m_lua.script("print(package.path)");
-        return true;
-    }
-    catch(sol::error err){
-        std::cout << err.what() << std::endl;
-        return false;
-    }
+    m_lua["add_pp"](path.toStdString());
+    m_lua.script("print(package.path)");
 }
 
 bool BGState::loadLuaRocks()
 {
     try{
-        m_lua.script("lr = require('luarocks')");
-        return true;
+    m_lua.script_file("C:\\Users\\russh\\git\\BrokenGlass\\build-64bit-Debug\\debug\\scripts\\LuaRocks\\luarocks.lua");
+    m_lua["command_line"]["run_command"]("search", "lua-http");
+    return true;
     }
     catch(sol::error err){
         std::cout << err.what() << std::endl;
-        return false;
+        exit(-1);
     }
 }
+
+//QString BGState::search(QString value)
+//{
+
+//}
