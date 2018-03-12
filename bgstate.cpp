@@ -8,40 +8,67 @@ BGState::BGState(QObject *parent) : QObject(parent)
     loadLuaRocks();
 }
 
-QString BGState::returnString(QString script)
+BGState::Errors BGState::search(QString rockname, QString version, QString options)
 {
-    sol::object result = runScript(script);
-    if(result.get_type() == sol::type::string)
+    try{
+        sol::optional<std::string> result =
+                m_lua["command_line"]["run_command"]("search", rockname.toUtf8());
+        if(!result)
+        {
+            //fail here
+        }
+        else
+        {
+            emit lrStdOut(QString::fromStdString(result.value_or("ERROR")));
+        }
+        return SunShine;
+    }
+    catch(sol::error err){
+        lrError(err.what());
+        _dead = true;
+        return LuaIsDead;
+    }
+}
+
+BGState::Errors BGState::installRock(QString rockname, QString version, QString options)
+{
+    try{
+        sol::optional<std::string> result =
+                m_lua["command_line"]["run_command"]("search", rockname.toUtf8());
+        if(!result)
+        {
+            //fail here
+        }
+        else
+        {
+            emit lrStdOut(QString::fromStdString(result.value_or("ERROR")));
+        }
+        return SunShine;
+    }
+    catch(sol::error err){
+        lrError(err.what());
+        _dead = true;
+        return BGState::Errors::LuaIsDead;
+    }
+}
+
+/**
+ * @brief BGState::runScript strictly lfor testing. Run a raw script, expects string output.
+ * @param script QString containing Lua Script.
+ * @return
+ */
+void BGState::runScript(QString script)
+{
+    sol::optional<std::string> result = m_lua.script(script.toStdString(),
+                                                     sol::script_default_on_error);
+    if(!result)
     {
-        return QString::fromStdString(result.as<std::string>());
+        //fail here
     }
     else
     {
-        return QString::null;
+        emit lrStdOut(QString::fromStdString(result.value_or("ERROR")));
     }
-}
-
-float BGState::returnNumber(QString script)
-{
-    return 0.0;
-}
-
-sol::table BGState::returnTable(QString script)
-{
-    return sol::nil;
-}
-
-bool BGState::returnBoolean(QString script)
-{
-    return false;
-}
-
-
-
-sol::object BGState::runScript(QString script)
-{
-    return m_lua.script(script.toStdString(),
-                        sol::script_default_on_error);
 }
 
 void BGState::addPackagePath(QString path)
@@ -53,15 +80,16 @@ void BGState::addPackagePath(QString path)
 bool BGState::loadLuaRocks()
 {
     try{
-    m_lua.script_file("C:\\Users\\russh\\git\\BrokenGlass\\build-64bit-Debug\\debug\\scripts\\LuaRocks\\luarocks.lua");
-    m_lua["command_line"]["run_command"]("search", "lua-http");
-    return true;
+        m_lua.script_file("C:\\Users\\russh\\git\\BrokenGlass\\build-64bit-Debug\\debug\\scripts\\LuaRocks\\luarocks.lua");
+//        m_lua["command_line"]["run_command"]("search", "lua-http");
+        return true;
     }
     catch(sol::error err){
         std::cout << err.what() << std::endl;
         exit(-1);
     }
 }
+
 
 //QString BGState::search(QString value)
 //{
