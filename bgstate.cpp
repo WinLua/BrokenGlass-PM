@@ -1,7 +1,9 @@
 #include "bgstate.h"
 #include <iostream>
 
-BGState::BGState(QObject *parent) : QObject(parent)
+BGState::BGState(QObject *parent) : QObject(parent),
+    m_lua(),
+    m_dead(false)
 {
     m_lua.open_libraries(sol::lib::base, sol::lib::io, sol::lib::string, sol::lib::package, sol::lib::math, sol::lib::table, sol::lib::os, sol::lib::debug);
     m_lua.script("function add_pp(val) package.path = package.path .. val .. ';' end") ;
@@ -12,10 +14,10 @@ BGState::Errors BGState::search(QString rockname, QString version, QString optio
 {
     try{
         sol::optional<std::string> result =
-                m_lua["command_line"]["run_command"]("search", rockname.toUtf8());
+                m_lua["command_line"]["run_command"]("search", rockname.toStdString());
         if(!result)
         {
-            //fail here
+            emit lrStdOut(tr("Oops. Died"));
         }
         else
         {
@@ -25,7 +27,7 @@ BGState::Errors BGState::search(QString rockname, QString version, QString optio
     }
     catch(sol::error err){
         lrError(err.what());
-        _dead = true;
+        m_dead = true;
         return LuaIsDead;
     }
 }
@@ -47,7 +49,7 @@ BGState::Errors BGState::installRock(QString rockname, QString version, QString 
     }
     catch(sol::error err){
         lrError(err.what());
-        _dead = true;
+        m_dead = true;
         return BGState::Errors::LuaIsDead;
     }
 }

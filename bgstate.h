@@ -30,7 +30,7 @@ public slots:
 
 private:
     sol::state m_lua;
-    bool _dead;
+    bool m_dead;
     bool loadLuaRocks();
     void addPackagePath(QString path);
     void runScript(QString script);
